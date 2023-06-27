@@ -11,6 +11,7 @@ lazy val root = project
 
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio" % zioVersion,
+      "dev.zio" %% "zio-json" % "1.2.0",
       // Add other libraries like zio-nio and zip-json here if needed
     ).map(_ % Compile),
     libraryDependencies ++= Seq(
