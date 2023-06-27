@@ -12,7 +12,7 @@ object Main extends ZIOAppDefault {
       path <- Console.readLine
       _ <- Console.printLine(s"You entered: $path")
       sudokuGrid <- ZIO.fromEither(readSudokuGridFromJson(path))
-      _ <- Console.putStrLn(s"Read Sudoku grid: ${sudokuGrid.cells}")
+      _ <- Console.printLine(s"Read Sudoku grid: ${sudokuGrid.cells}")
       // Add your Sudoku solver logic here, utilizing ZIO and interacting with the ZIO Console
     } yield ()
 
