@@ -10,7 +10,7 @@ object Main extends ZIOAppDefault {
     sudoku.grouped(3).map { bigGroup =>
       bigGroup.map { row =>
         row.grouped(3).map { smallGroup =>
-          smallGroup.map(cell => 
+          smallGroup.map(cell =>
             cell.getOrElse("-")
           ).mkString(" ", " ", " ")
         }.mkString("|", "|", "|")
@@ -36,79 +36,90 @@ object Main extends ZIOAppDefault {
     rowProperty && columnProperty && boxProperty
   }
 
-
-  /** Solves the sudoku puzzle with backtracking.
-    *
-    * @param sudoku
-    * @param x
-    * @param y
-    */
-  
   private def solve(cells: List[(Int, Int, List[Int])], sudoku: Board): Option[Board] = {
-  cells match {
-    case Nil => Some(sudoku) 
-    case (row, col, possibilities) :: remainingCells =>
-      if (possibilities.isEmpty) {
-        None
-      } else {
-        val filteredPossibilities = possibilities.filter(validate(sudoku, col, row, _))
-        filteredPossibilities.foreach { nextValue =>
-          val updatedSudoku = sudoku.updated(row, sudoku(row).updated(col, Some(nextValue)))
-          val solution = solve(remainingCells, updatedSudoku)
-          if(solution.isDefined){
-            return solution
-          } 
+    cells match {
+      case Nil => Some(sudoku)
+      case (row, col, possibilities) :: remainingCells =>
+        if (possibilities.isEmpty) {
+          None
+        } else {
+          val filteredPossibilities = possibilities.filter(validate(sudoku, col, row, _))
+          filteredPossibilities.foreach { nextValue =>
+            val updatedSudoku = sudoku.updated(row, sudoku(row).updated(col, Some(nextValue)))
+            val solution = solve(remainingCells, updatedSudoku)
+            if (solution.isDefined) {
+              return solution
+            }
+          }
+          None
         }
-        None
-      }
     }
   }
 
-  def getPossibleValues(sudoku: Board): List[(Int, Int, List[Int])] = {
-    val cells = for {
-      row <- 0 until 9
-      col <- 0 until 9
-      if sudoku(row)(col).isEmpty
-    } yield (row, col)
+  def getPossibleValues(sudoku: Board): Either[String, List[(Int, Int, List[Int])]] = {
+    val validDimensions = sudoku.length == 9 && sudoku.forall(_.length == 9)
+    if (!validDimensions) {
+      Left("Invalid Sudoku dimensions")
+    } else {
+      val cells = for {
+        row <- 0 until 9
+        col <- 0 until 9
+        if sudoku(row)(col).isEmpty
+      } yield (row, col)
 
-    cells.map { case (row, col) =>
-      val allValues = Set(1, 2, 3, 4, 5, 6, 7, 8, 9)
-      val remainingValues = allValues.filter(validate(sudoku, col, row, _))
-      (row, col, remainingValues.toList.sorted)
-    }.toList.sortBy(_._3.length)
-  } 
+      val possibleValues = cells.map { case (row, col) =>
+        val allValues = Set(1, 2, 3, 4, 5, 6, 7, 8, 9)
+        val remainingValues = allValues.filter(validate(sudoku, col, row, _))
+        (row, col, remainingValues.toList.sorted)
+      }.toList.sortBy(_._3.length)
+
+      Right(possibleValues)
+    }
+  }
 
   val sudokuToSolve =
-      Vector(
-        Vector(Some(5), Some(3), None, None, Some(7), None, None, None, None),
-        Vector(Some(6), None, None, Some(1), Some(9), Some(5), None, None, None),
-        Vector(None, Some(9), Some(8), None, None, None, None, Some(6), None),
-        Vector(Some(8), None, None, None, Some(6), None, None, None, Some(3)),
-        Vector(Some(4), None, None, Some(8), None, Some(3), None, None, Some(1)),
-        Vector(Some(7), None, None, None, Some(2), None, None, None, Some(6)),
-        Vector(None, Some(6), None, None, None, None, Some(2), Some(8), None),
-        Vector(None, None, None, Some(4), Some(1), Some(9), None, None, Some(5)),
-        Vector(None, None, None, None, Some(8), None, None, Some(7), Some(9))
-      )
+    Vector(
+      Vector(Some(5), Some(3), None, None, Some(7), None, None, None, None),
+      Vector(Some(6), None, None, Some(1), Some(9), Some(5), None, None, None),
+      Vector(None, Some(9), Some(8), None, None, None, None, Some(6), None),
+      Vector(Some(8), None, None, None, Some(6), None, None, None, Some(3)),
+      Vector(Some(4), None, None, Some(8), None, Some(3), None, None, Some(1)),
+      Vector(Some(7), None, None, None, Some(2), None, None, None, Some(6)),
+      Vector(None, Some(6), None, None, None, None, Some(2), Some(8), None),
+      Vector(None, None, None, Some(4), Some(1), Some(9), None, None, Some(5)),
+      Vector(None, None, None, None, Some(8), None, None, Some(7), Some(9))
+    )
 
   val sudokuToSolveBis =
-      Vector(
-        Vector(None, None, Some(5), None, Some(4), None, Some(7), None, None),
-        Vector(None, Some(7), Some(4), Some(8), Some(3), Some(2), Some(1), Some(5), None),
-        Vector(Some(6), Some(8), None, None, Some(1), None, None, Some(9), Some(2)),
-        Vector(None, Some(9), None, Some(3), Some(6), Some(1), None, Some(7), None),
-        Vector(Some(7), Some(4), Some(1), Some(2), None, Some(5), Some(6), Some(8), Some(3)),
-        Vector(None, Some(5), None, Some(7), Some(8), Some(4), None, Some(1), None),
-        Vector(Some(5), Some(3), None, None, Some(7), None, None, Some(2), Some(1)),
-        Vector(None, Some(1), Some(7), Some(9), Some(2), Some(8), Some(3), Some(6), None),
-        Vector(None, None, Some(2), None, Some(5), None, Some(9), None, None)
-      )    
+    Vector(
+      Vector(None, None, Some(5), None, Some(4), None, Some(7), None, None),
+      Vector(None, Some(7), Some(4), Some(8), Some(3), Some(2), Some(1), Some(5), None),
+      Vector(Some(6), Some(8), None, None, Some(1), None, None, Some(9), Some(2)),
+      Vector(None, Some(9), None, Some(3), Some(6), Some(1), None, Some(7), None),
+      Vector(Some(7), Some(4), Some(1), Some(2), None, Some(5), Some(6), Some(8), Some(3)),
+      Vector(None, Some(5), None, Some(7), Some(8), Some(4), None, Some(1), None),
+      Vector(Some(5), Some(3), None, None, Some(7), None, None, Some(2), Some(1)),
+      Vector(None, Some(1), Some(7), Some(9), Some(2), Some(8), Some(3), Some(6), None),
+      Vector(None, None, Some(2), None, Some(5), None, Some(9), None, None)
+    )
 
   def run: ZIO[Any, Throwable, Unit] =
     for {
-      _ <- Console.print(prettyPrint(solve(getPossibleValues(sudokuToSolveBis), sudokuToSolveBis).getOrElse(Vector(Vector(Some(0))))))
+      _ <- {
+        getPossibleValues(sudokuToSolveBis) match {
+          case Left(error) =>
+            Console.printLine(s"Error: $error")
+          case Right(possibilities) =>
+            solve(possibilities, sudokuToSolveBis) match {
+              case Some(solution) =>
+                Console.print(prettyPrint(solution))
+              case None =>
+                Console.printLine("No solution found.")
+            }
+        }
+      }
       path <- Console.readLine
-      _ <-  Console.printLine(s"You entered: $path")
+      _ <- Console.printLine(s"You entered: $path")
       // Add your Sudoku solver logic here, utilizing ZIO and interacting with the ZIO Console
     } yield ()
 }
