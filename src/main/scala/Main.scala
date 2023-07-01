@@ -35,14 +35,6 @@ object Main extends ZIOAppDefault {
 
     rowProperty && columnProperty && boxProperty
   }
-
-
-  /** Solves the sudoku puzzle with backtracking.
-    *
-    * @param sudoku
-    * @param x
-    * @param y
-    */
   
   def solve(cells: List[(Int, Int, List[Int])], sudoku: Board): Option[Board] = {
     cells match {
