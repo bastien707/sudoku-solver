@@ -27,6 +27,18 @@ class MySuite extends munit.FunSuite {
     Vector(None, None, None, None, Some(8), None, None, Some(7), Some(9))
   )
 
+  val solvedSudoku = Vector(
+    Vector(Some(5), Some(3), Some(4), Some(6), Some(7), Some(8), Some(9), Some(1), Some(2)),
+    Vector(Some(6), Some(7), Some(2), Some(1), Some(9), Some(5), Some(3), Some(4), Some(8)),
+    Vector(Some(1), Some(9), Some(8), Some(3), Some(4), Some(2), Some(5), Some(6), Some(7)),
+    Vector(Some(8), Some(5), Some(9), Some(7), Some(6), Some(1), Some(4), Some(2), Some(3)),
+    Vector(Some(4), Some(2), Some(6), Some(8), Some(5), Some(3), Some(7), Some(9), Some(1)),
+    Vector(Some(7), Some(1), Some(3), Some(9), Some(2), Some(4), Some(8), Some(5), Some(6)),
+    Vector(Some(9), Some(6), Some(1), Some(5), Some(3), Some(7), Some(2), Some(8), Some(4)),
+    Vector(Some(2), Some(8), Some(7), Some(4), Some(1), Some(9), Some(6), Some(3), Some(5)),
+    Vector(Some(3), Some(4), Some(5), Some(2), Some(8), Some(6), Some(1), Some(7), Some(9))
+  )
+
   test("prettyPrint") {
 
     val expectedOutput =
@@ -67,11 +79,26 @@ class MySuite extends munit.FunSuite {
   }
 
   test("validate") {
-    val result = Main.validate(sudoku,0, 0, 6) // can place 6 at col 0, row 0 because in same col
+    val result = Main.validate(
+      sudoku,
+      0,
+      0,
+      6
+    ) // can place 6 at col 0, row 0 because in same col
     assertEquals(result, false)
-    val result2 = Main.validate(sudoku, 0, 0, 5) // cannot place 5 col 0, row 0 because in same row/col/square
+    val result2 = Main.validate(
+      sudoku,
+      0,
+      0,
+      5
+    ) // cannot place 5 col 0, row 0 because in same row/col/square
     assertEquals(result2, false)
-    val result3 = Main.validate(sudoku, 0, 2, 8) // cannot place 8 at col 0, row 2 because in same row/col/square
+    val result3 = Main.validate(
+      sudoku,
+      0,
+      2,
+      8
+    ) // cannot place 8 at col 0, row 2 because in same row/col/square
     assertEquals(result3, false)
     val result4 = Main.validate(sudoku, 0, 2, 9) // cannot place 9 at col 0, row 2 because in same square
     assertEquals(result4, false)
@@ -100,6 +127,20 @@ class MySuite extends munit.FunSuite {
       case Right(values) =>
         assertEquals(values(0), cell1)
         assertEquals(values(1), cell2)
+    }
+  }
+
+  test("solve") {
+    Main.getPossibleValues(sudoku) match {
+      case Left(error) =>
+        assert(error == "Invalid Sudoku dimensions")
+      case Right(possibilities) =>
+        Main.solve(possibilities, sudoku) match {
+          case Some(solution) =>
+            assertEquals(solution, solvedSudoku)
+          case None =>
+            assert(false, "Expected Some(solution), but got None")
+        }
     }
   }
 }
