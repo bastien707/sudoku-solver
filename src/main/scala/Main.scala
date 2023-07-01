@@ -44,23 +44,21 @@ object Main extends ZIOAppDefault {
     * @param y
     */
   
-  private def solve(cells: List[(Int, Int, List[Int])], sudoku: Board): Option[Board] = {
-  cells match {
-    case Nil => Some(sudoku) 
-    case (row, col, possibilities) :: remainingCells =>
-      if (possibilities.isEmpty) {
-        None
-      } else {
-        val filteredPossibilities = possibilities.filter(validate(sudoku, col, row, _))
-        filteredPossibilities.foreach { nextValue =>
-          val updatedSudoku = sudoku.updated(row, sudoku(row).updated(col, Some(nextValue)))
-          val solution = solve(remainingCells, updatedSudoku)
-          if(solution.isDefined){
-            return solution
-          } 
+  def solve(cells: List[(Int, Int, List[Int])], sudoku: Board): Option[Board] = {
+    cells match {
+      case Nil => Some(sudoku) 
+      case (row, col, possibilities) :: remainingCells =>
+        if (possibilities.isEmpty) {
+          None
+        } else {
+          val filteredPossibilities = possibilities.filter(validate(sudoku, col, row, _))
+          val solutions = for {
+            nextValue <- filteredPossibilities
+            updatedSudoku = sudoku.updated(row, sudoku(row).updated(col, Some(nextValue)))
+            solution <- solve(remainingCells, updatedSudoku)
+          } yield solution
+          solutions.headOption
         }
-        None
-      }
     }
   }
 
@@ -72,7 +70,7 @@ object Main extends ZIOAppDefault {
     } yield (row, col)
 
     cells.map { case (row, col) =>
-      val allValues = Set(1, 2, 3, 4, 5, 6, 7, 8, 9)
+      val allValues = List(1, 2, 3, 4, 5, 6, 7, 8, 9)
       val remainingValues = allValues.filter(validate(sudoku, col, row, _))
       (row, col, remainingValues.toList.sorted)
     }.toList.sortBy(_._3.length)
@@ -106,7 +104,7 @@ object Main extends ZIOAppDefault {
 
   def run: ZIO[Any, Throwable, Unit] =
     for {
-      _ <- Console.print(prettyPrint(solve(getPossibleValues(sudokuToSolveBis), sudokuToSolveBis).getOrElse(Vector(Vector(Some(0))))))
+      _ <- Console.print(prettyPrint(solve(getPossibleValues(sudokuToSolve), sudokuToSolve).getOrElse(Vector(Vector(Some(0))))))
       path <- Console.readLine
       _ <-  Console.printLine(s"You entered: $path")
       // Add your Sudoku solver logic here, utilizing ZIO and interacting with the ZIO Console
