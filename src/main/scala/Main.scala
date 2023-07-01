@@ -36,22 +36,28 @@ object Main extends ZIOAppDefault {
     rowProperty && columnProperty && boxProperty
   }
 
-  private def solve(cells: List[(Int, Int, List[Int])], sudoku: Board): Option[Board] = {
+
+  /** Solves the sudoku puzzle with backtracking.
+    *
+    * @param sudoku
+    * @param x
+    * @param y
+    */
+  
+  def solve(cells: List[(Int, Int, List[Int])], sudoku: Board): Option[Board] = {
     cells match {
-      case Nil => Some(sudoku)
+      case Nil => Some(sudoku) 
       case (row, col, possibilities) :: remainingCells =>
         if (possibilities.isEmpty) {
           None
         } else {
           val filteredPossibilities = possibilities.filter(validate(sudoku, col, row, _))
-          filteredPossibilities.foreach { nextValue =>
-            val updatedSudoku = sudoku.updated(row, sudoku(row).updated(col, Some(nextValue)))
-            val solution = solve(remainingCells, updatedSudoku)
-            if (solution.isDefined) {
-              return solution
-            }
-          }
-          None
+          val solutions = for {
+            nextValue <- filteredPossibilities
+            updatedSudoku = sudoku.updated(row, sudoku(row).updated(col, Some(nextValue)))
+            solution <- solve(remainingCells, updatedSudoku)
+          } yield solution
+          solutions.headOption
         }
     }
   }
@@ -68,7 +74,7 @@ object Main extends ZIOAppDefault {
       } yield (row, col)
 
       val possibleValues = cells.map { case (row, col) =>
-        val allValues = Set(1, 2, 3, 4, 5, 6, 7, 8, 9)
+        val allValues = List(1, 2, 3, 4, 5, 6, 7, 8, 9)
         val remainingValues = allValues.filter(validate(sudoku, col, row, _))
         (row, col, remainingValues.toList.sorted)
       }.toList.sortBy(_._3.length)
