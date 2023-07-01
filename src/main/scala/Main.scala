@@ -48,10 +48,11 @@ object Main extends ZIOAppDefault {
     cells match {
       case Nil => Some(sudoku) 
       case (row, col, possibilities) :: remainingCells =>
-        if (possibilities.isEmpty) {
+        val filteredPossibilities = possibilities.filter(validate(sudoku, col, row, _))
+        if(filteredPossibilities.isEmpty){
           None
-        } else {
-          val filteredPossibilities = possibilities.filter(validate(sudoku, col, row, _))
+        }
+        else {
           val solutions = for {
             nextValue <- filteredPossibilities
             updatedSudoku = sudoku.updated(row, sudoku(row).updated(col, Some(nextValue)))
