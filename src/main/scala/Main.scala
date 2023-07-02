@@ -1,38 +1,36 @@
 package sudoku
 
 import io.circe.parser._
-import io.circe._
+import io.circe.{Decoder, HCursor}
 import zio._
-import zio.nio.file.{Files, Path}
-import zio.blocking.Blocking
-import zio.stream._
-import zio.stream.ZStream.Pull.Effect
+import zio.ZIO
+import zio.Console._
 
 case class SudokuGrid(grid: Array[Array[Int]])
 
-object Main extends App {
+object Main extends ZIOAppDefault {
 
   implicit val decoder: Decoder[SudokuGrid] = (c: HCursor) => {
     c.get[Array[Array[Int]]]("grid").map(SudokuGrid.apply)
   }
 
-  def run(args: List[String]): ZIO[Any, Nothing, ExitCode] =
-    (for {
-      _     <- putStrLn("Enter the path to the JSON file containing the Sudoku problem:")
-      path  <- getStrLn
-      grid  <- readJsonFile(path)
-      _     <- printGrid(grid)
-    } yield ExitCode.success).catchAll(error => putStrLn(s"Execution failed with error: $error") *> ZIO.succeed(ExitCode.failure))
-
-  def readJsonFile(path: String): ZIO[Any, Throwable, SudokuGrid] =
+  def run: ZIO[ZEnv, Throwable, Unit] =
     for {
-      file   <- ZIO.effect(Path(path))
-      bytes  <- Files.readAllBytes(file)
-      json   <- ZIO.fromEither(parse(new String(bytes.toArray)))
-      grid   <- ZIO.fromEither(json.as[SudokuGrid])
+      _    <- putStrLn("Enter the path to the JSON file containing the Sudoku problem:")
+      path <- getStrLn
+      grid <- readJsonFile(path)
+      _    <- processSudokuGrid(grid)
+    } yield ()
+
+  def readJsonFile(path: String): ZIO[Blocking, Throwable, SudokuGrid] =
+    for {
+      content <- effectBlocking(scala.io.Source.fromFile(path).mkString)
+      json    <- ZIO.fromEither(parse(content))
+      grid    <- ZIO.fromEither(json.as[SudokuGrid])
     } yield grid
 
-  def printGrid(grid: SudokuGrid): ZIO[Console, Nothing, Unit] =
-    ZIO.effectTotal(grid.grid.foreach(row => println(row.mkString(" "))))
-  
+  def processSudokuGrid(grid: SudokuGrid): ZIO[Console, Nothing, Unit] =
+    putStrLn(s"Received Sudoku Grid: ${grid.grid.deep.mkString("\n")}")
+
 }
+
