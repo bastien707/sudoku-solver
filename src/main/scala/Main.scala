@@ -1,10 +1,22 @@
 package sudoku
 
 import zio._
+import scala.io.Source
 
 object Main extends ZIOAppDefault {
 
   type Board = Vector[Vector[Option[Int]]]
+  case class SudokuBoard(board: Board)
+  
+  def parseBoardFromFile(path: String): Board = {
+    val lines = Source.fromFile(path).getLines().toList
+    lines.map { line =>
+      line.split(" ").map {
+        case "." => None
+        case num => Some(num.toInt)
+      }.toVector
+    }.toVector
+  }
 
   def prettyPrint(sudoku: Board): String = {
     sudoku.grouped(3).map { bigGroup =>
@@ -103,22 +115,23 @@ object Main extends ZIOAppDefault {
     )
 
   def run: ZIO[Any, Throwable, Unit] =
-    for {
+     for {
+      _ <- Console.printLine("Enter the number of the sudoku to solve (1 or 2):")
+      number <- Console.readLine
+      board = parseBoardFromFile(s"src/main/resources/sudoku$number.txt")
       _ <- {
-        getPossibleValues(sudokuToSolveBis) match {
-          case Left(error) =>
-            Console.printLine(s"Error: $error")
-          case Right(possibilities) =>
-            solve(possibilities, sudokuToSolveBis) match {
-              case Some(solution) =>
-                Console.print(prettyPrint(solution))
-              case None =>
-                Console.printLine("No solution found.")
-            }
-        }
+        Console.printLine(prettyPrint(board)+ "\n\nSolving...\n")
       }
-      path <- Console.readLine
-      _ <- Console.printLine(s"You entered: $path")
-      // Add your Sudoku solver logic here, utilizing ZIO and interacting with the ZIO Console
-    } yield ()
+      _ <- getPossibleValues(board) match {
+        case Left(error) =>
+          Console.printLine(s"Error: $error")
+        case Right(possibilities) =>
+          solve(possibilities, board) match {
+            case Some(solution) =>
+              Console.print(prettyPrint(solution))
+            case None =>
+              Console.printLine("No solution found.")
+          }
+      }
+    } yield()
 }
