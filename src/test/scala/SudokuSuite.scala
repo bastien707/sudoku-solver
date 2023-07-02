@@ -25,6 +25,18 @@ class SudokuSuite extends munit.FunSuite {
     Vector(None, None, None, None, Some(8), None, None, Some(7), Some(9))
   )
 
+  val noSolutionSudoku = Vector(
+    Vector(Some(5), Some(3), None, None, Some(7), None, None, None, None),
+    Vector(Some(6), None, None, Some(1), Some(9), Some(5), None, None, None),
+    Vector(None, Some(9), Some(8), None, None, None, None, Some(6), None),
+    Vector(Some(8), None, None, None, Some(6), None, None, None, Some(3)),
+    Vector(Some(4), None, None, Some(8), None, Some(3), None, None, Some(1)),
+    Vector(Some(7), None, None, None, Some(2), None, None, None, Some(6)),
+    Vector(None, Some(6), None, None, None, None, Some(2), Some(8), None),
+    Vector(None, None, None, Some(4), Some(1), Some(9), None, None, Some(5)),
+    Vector(None, None, None, None, Some(8), None, None, Some(7), Some(8))
+  )
+
   val solvedSudoku = Vector(
     Vector(Some(5), Some(3), Some(4), Some(6), Some(7), Some(8), Some(9), Some(1), Some(2)),
     Vector(Some(6), Some(7), Some(2), Some(1), Some(9), Some(5), Some(3), Some(4), Some(8)),
@@ -105,11 +117,25 @@ class SudokuSuite extends munit.FunSuite {
         assert(error == "Invalid Sudoku dimensions")
       case Right(possibilities) =>
         Main.solve(possibilities, sudoku) match {
-          case Some(solution) =>
-            assertEquals(solution, solvedSudoku)
-          case None =>
-            assert(false, "Expected Some(solution), but got None")
+          case Left(error) =>
+            assert(error == "No solution found")
+          case Right(solved) =>
+            assertEquals(solved, solvedSudoku)
         }
     }
+  }
+
+  test("solve should return no solution found") {
+    Main.getPossibleValues(sudoku) match {
+      case Left(error) =>
+        assert(error == "Invalid Sudoku dimensions")
+      case Right(possibilities) =>
+        Main.solve(possibilities, noSolutionSudoku) match {
+          case Left(error) =>
+            assert(error == "No solution found")
+          case Right(solved) =>
+            assert(false, "Should not have returned a solution")
+        }
+      }
   }
 }
