@@ -87,33 +87,7 @@ object Main extends ZIOAppDefault {
       Right(possibleValues)
     }
   }
-
-  val sudokuToSolve =
-    Vector(
-      Vector(Some(5), Some(3), None, None, Some(7), None, None, None, None),
-      Vector(Some(6), None, None, Some(1), Some(9), Some(5), None, None, None),
-      Vector(None, Some(9), Some(8), None, None, None, None, Some(6), None),
-      Vector(Some(8), None, None, None, Some(6), None, None, None, Some(3)),
-      Vector(Some(4), None, None, Some(8), None, Some(3), None, None, Some(1)),
-      Vector(Some(7), None, None, None, Some(2), None, None, None, Some(6)),
-      Vector(None, Some(6), None, None, None, None, Some(2), Some(8), None),
-      Vector(None, None, None, Some(4), Some(1), Some(9), None, None, Some(5)),
-      Vector(None, None, None, None, Some(8), None, None, Some(7), Some(9))
-    )
-
-  val sudokuToSolveBis =
-    Vector(
-      Vector(None, None, Some(5), None, Some(4), None, Some(7), None, None),
-      Vector(None, Some(7), Some(4), Some(8), Some(3), Some(2), Some(1), Some(5), None),
-      Vector(Some(6), Some(8), None, None, Some(1), None, None, Some(9), Some(2)),
-      Vector(None, Some(9), None, Some(3), Some(6), Some(1), None, Some(7), None),
-      Vector(Some(7), Some(4), Some(1), Some(2), None, Some(5), Some(6), Some(8), Some(3)),
-      Vector(None, Some(5), None, Some(7), Some(8), Some(4), None, Some(1), None),
-      Vector(Some(5), Some(3), None, None, Some(7), None, None, Some(2), Some(1)),
-      Vector(None, Some(1), Some(7), Some(9), Some(2), Some(8), Some(3), Some(6), None),
-      Vector(None, None, Some(2), None, Some(5), None, Some(9), None, None)
-    )
-
+  
   def run: ZIO[Any, Throwable, Unit] =
      for {
       _ <- Console.printLine("Enter the number of the sudoku to solve (1 or 2):")
