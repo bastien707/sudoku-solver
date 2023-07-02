@@ -6,7 +6,6 @@ import scala.io.Source
 object Main extends ZIOAppDefault {
 
   type Board = Vector[Vector[Option[Int]]]
-  case class SudokuBoard(board: Board)
   
   def parseBoardFromFile(path: String): Board = {
     val lines = Source.fromFile(path).getLines().toList
@@ -48,21 +47,23 @@ object Main extends ZIOAppDefault {
     rowProperty && columnProperty && boxProperty
   }
   
-  def solve(cells: List[(Int, Int, List[Int])], sudoku: Board): Option[Board] = {
+  def solve(cells: List[(Int, Int, List[Int])], sudoku: Board): Either[String, Board] = {
     cells match {
-      case Nil => Some(sudoku) 
+      case Nil => Right(sudoku)
       case (row, col, possibilities) :: remainingCells =>
         val filteredPossibilities = possibilities.filter(validate(sudoku, col, row, _))
-        if(filteredPossibilities.isEmpty){
-          None
-        }
-        else {
+        if (filteredPossibilities.isEmpty) {
+          Left("No solution found")
+        } else {
           val solutions = for {
             nextValue <- filteredPossibilities
             updatedSudoku = sudoku.updated(row, sudoku(row).updated(col, Some(nextValue)))
-            solution <- solve(remainingCells, updatedSudoku)
+            solution <- solve(remainingCells, updatedSudoku) match {
+              case Left(_) => None
+              case Right(s) => Some(s)
+            }
           } yield solution
-          solutions.headOption
+          solutions.headOption.toRight("No solution found")
         }
     }
   }
@@ -101,10 +102,10 @@ object Main extends ZIOAppDefault {
           Console.printLine(s"Error: $error")
         case Right(possibilities) =>
           solve(possibilities, board) match {
-            case Some(solution) =>
-              Console.print(prettyPrint(solution))
-            case None =>
-              Console.printLine("No solution found.")
+            case Left(error) =>
+              Console.printLine(s"Error: $error")
+            case Right(solved) =>
+              Console.printLine(prettyPrint(solved))
           }
       }
     } yield()
