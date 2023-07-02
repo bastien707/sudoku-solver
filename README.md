@@ -12,9 +12,40 @@ The goal of this project is to create a sudoku solver in Scala that will works b
 
 # How to run
 
+To run the project you need to have sbt installed on your computer. You can download it here : https://www.scala-sbt.org/download.html. After that you just need to clone the project and run the command sbt run in the root of the project.
+
+Before running it's recommended to clean the project with the command sbt clean.
+```
+sbt clean
+```
+
+To compile the project you can use the command sbt compile.
+```
+sbt compile
+```
+
+To run the project you can use the command sbt run.
+```
+sbt run
+```
+
+To run the tests you can use the command sbt test.
+```
+sbt test
+```
+
+### For VSCode users
+If you have any import issue and are working with VSCode it's recommended to build imports with Metals. You can do this by pressing Ctrl+Shift+P (Shift+Cmd+P) and search for Metals: Import build.
+
 # Libraries choice
 
+We decided to use the FunSuite library to write our tests because it's a simple library to use. We also used the scala.io library to read the file containing the sudoku nothing more.
+
 # Data structure
+
+We decided to use a Vector of Vector of Option[Int] to represent our sudoku. We choose this data structure because it's immutable and we can easily access to the value of a cell by using the apply() function. We have hesitated between Vector, List and Array but we choose Vector because it's also faster than List and Array and more memory efficient than Array.
+There are also a set of methods to manipulate the data structure like map, filter, etc which are very useful to solve the sudoku.
+We first thought to deserialize a json file to get the sudoku but we decided to use a text file because it's easier to read even if it's less user friendly than json to write a sudoku. It's a choice we made because we wanted to focus on the algorithm and not on the file format.
 
 # Algorithm and functions 
 
@@ -35,8 +66,12 @@ This function take the grid, the column, the row and the value to put in the sud
 After having a function to check the validity of an action, we needed to get a list of all the the coordinates of the empty cell and the list of the possible numbers. With a for comprehension we get all the empty cells and we check wit the validate() function which numbers are possible. Finally we sort the list by length of the possiblities list. 
 
 ### The solve() function 
-Our solve() function take the grid, and the list of cells ordered with their possibilities and return a filled board or None if there's no solution. We apply a pattern matching on the list of possibilities, if the list is a Nil, that means we finish the work so we send the Board. If no we filter the possibilties computed at before the call the function to check keep the one that are still available, if this filter list is empty it means there is no solution so we send none. If there is some possibilites, we use a for comprehenion to make a reccursive call with the updated grid and the remaning values of the cells list. Finally we send the first grid of the solutions list, which is supposed to be unique, or empty because a sudoku has only one solution.    
+Our solve() function take the grid, and the list of cells ordered with their possibilities and return a filled board or None if there's no solution. We apply a pattern matching on the list of possibilities, if the list is a Nil, that means we finish the work so we send the Board. If no we filter the possibilties computed at before the call the function to check keep the one that are still available, if this filter list is empty it means there is no solution so we send none. If there is some possibilites, we use a for comprehenion to make a reccursive call with the updated grid and the remaning values of the cells list. Finally we send the first grid of the solutions list, which is supposed to be unique, or empty because a sudoku has only one solution. Moreover, we use the Either type to handle the error if there is no solution.
 
-# Testing 
+# Testing
+
+We wrote some tests to check if our functions are working properly. We tested the prettyPrint function to make sure it display the sudoku correctly. We tested the validate function to check if it return the right boolean when we try to put a number in a cell, there is tests to check that it returns true when the number is not in the row, column or block and false when it's not the case. We also tested the getPossibilities function to check if it return the right list of possibilities for a cell but also if it returns and error if the sudoku is invalid. Finally we tested the solve function to check if it return the right board when we give it a sudoku.
 
 # Error handling
+
+We decided to use the Either type to handle errors. We use the Left type to return an error message and the Right type to return the result of the function. We use this type in the getPossibilities function to return an error if the sudoku is invalid. We also use it in the solve function to return an error if there is no solution. Option is also used in our code to handle the empty cells which is better than using null because it's more safe and it's a functional programming principle.
