@@ -45,7 +45,7 @@ We decided to use the FunSuite library to write our tests because it's a simple 
 
 We decided to use a Vector of Vector of Option[Int] to represent our sudoku. We choose this data structure because it's immutable and we can easily access to the value of a cell by using the apply() function. We have hesitated between Vector, List and Array but we choose Vector because it's also faster than List and Array and more memory efficient than Array.
 There are also a set of methods to manipulate the data structure like map, filter, etc which are very useful to solve the sudoku.
-We first thought to deserialize a json file to get the sudoku but we decided to use a text file because it's easier to read even if it's less user friendly than json to write a sudoku. It's a choice we made because we wanted to focus on the algorithm and not on the file format.
+We first thought to deserialize a json file to get the sudoku but we decided to use a text file because it's easier (and the documentation is not updated on the new version of ZIO) to read even if it's less user friendly than json to write a sudoku. It's a choice we made because we wanted to focus on the algorithm and not on the file format.
 
 # Algorithm and functions 
 
