@@ -7,19 +7,24 @@ object Main extends ZIOAppDefault {
 
   type Board = Vector[Vector[Option[Int]]]
   
-  def parseBoardFromFile(path: String): Either[String,Board] = try {
-    val lines = Source.fromFile(path).getLines().toList
-    val ret = lines.map { line =>
-      line.split(" ").map {
-        case "." => None
-        case num => Some(num.toInt)
+  def parseBoardFromFile(path: String): Either[String, Board] = {
+    try {
+      val lines = Source.fromFile(path).getLines().toList
+      val ret = lines.map { line =>
+        line.split(" ").map {
+          case "." => None
+          case num => Some(num.toInt)
+        }.toVector
       }.toVector
-    }.toVector
-    Right(ret)
-  }
-  catch{
-    case nbformatex: java.lang.NumberFormatException => 
-      Left(s"Error parsing file $nbformatex")
+      Right(ret)
+    } catch {
+      case _: java.io.FileNotFoundException =>
+        Left(s"File not found: $path")
+      case ex: java.lang.NumberFormatException =>
+        Left(s"Error parsing file: Invalid number format in $path")
+      case ex: Throwable =>
+        Left(s"Error parsing file: ${ex.getMessage}")
+    }
   }
 
   def prettyPrint(sudoku: Board): String = {
@@ -102,7 +107,6 @@ object Main extends ZIOAppDefault {
         case Left(error) =>
           Console.printLine(s"Error while parsing : $error")
         case Right(board) => 
-          //Console.printLine(prettyPrint(board)+ "\n\nSolving...\n") // I don't know why but there is a problem with this instruction (maybe switch to println)
           println(prettyPrint(board)+ "\n\nSolving...\n")
           getPossibleValues(board) match {
             case Left(error) =>

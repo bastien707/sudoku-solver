@@ -138,4 +138,37 @@ class SudokuSuite extends munit.FunSuite {
         }
       }
   }
+
+  test("parseBoardFromFile should return Left when file not found") {
+    val path = "thisFileDoesNotExists.txt"
+    val result = Main.parseBoardFromFile(path)
+    result match {
+      case Left(error) =>
+        assert(error == "File not found: " + path)
+      case Right(sudoku) =>
+        assert(false, "Should not have returned a sudoku")
+    }
+  }
+
+  test("parseBoardFromFile should return Left when file is invalid") {
+    val path = "src/main/resources/sudoku3.txt"
+    val result = Main.parseBoardFromFile(path)
+    result match {
+      case Left(error) =>
+        assert(error == "Error parsing file: Invalid number format in " + path)
+      case Right(sudoku) =>
+        assert(false, "Should not have returned a sudoku")
+    }
+  }
+
+  test("parseBoardFromFile should return Right when file is valid") {
+    val path = "src/main/resources/sudoku1.txt"
+    val result = Main.parseBoardFromFile(path)
+    result match {
+      case Left(error) =>
+        assert(false, "Should not have returned an error")
+      case Right(sudoku) =>
+        assertEquals(sudoku, sudoku)
+    }
+  }
 }
