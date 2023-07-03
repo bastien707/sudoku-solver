@@ -51,11 +51,13 @@ We first thought to deserialize a json file to get the sudoku but we decided to 
 
 To build the solver we only needed 3 functions quite shorts thanks to Scala syntax. We also added a prettyPrint() function in order to better see the sudoku in the console. The strength of our solver algorithm is that he compute the possibilities of each empty cells and begin to solve with the one that has the least instead of taking it randomly. This can reduce highly the complexity of the code by avoiding useless computation.
 
+## The parseBoardFromFile() function
+
+The parseBoardFromFile function reads a Sudoku board from a file. It returns an Either where the Right value contains the parsed board as a two-dimensional vector of optional integers, and the Left value represents any encountered errors during the parsing process. The function handles exceptions for file not found, invalid number format, and general exceptions, returning appropriate error messages in the Left case.
+
 ## The prettyPrint() function
 
 This function take a Board in parameter and return a string containing the content of this data structure as Sudoku grid. We use the function grouped() to split our grid by block of 3 because the grid is a 9x9 size. After that, we have 3 block of 3 vectors so we split it again in 3 to have groups of 3 optionnals, we display each or put a - if there is no value. We put a | separator between the group of 3 optionals and +-----+ between the group of vectors. In the function mkString we also specify that the separator is supposed to be present as a prefix and as a suffix by setting the argument 3 times. 
-
-## Solver algorithm functions
 
 ### The validate() function 
 
@@ -70,7 +72,7 @@ Our solve() function take the grid, and the list of cells ordered with their pos
 
 # Testing
 
-We wrote some tests to check if our functions are working properly. We tested the prettyPrint function to make sure it display the sudoku correctly. We tested the validate function to check if it return the right boolean when we try to put a number in a cell, there is tests to check that it returns true when the number is not in the row, column or block and false when it's not the case. We also tested the getPossibilities function to check if it return the right list of possibilities for a cell but also if it returns and error if the sudoku is invalid. Finally we tested the solve function to check if it return the right board when we give it a sudoku.
+We wrote some tests to check if our functions are working properly. We tested the prettyPrint function to make sure it display the sudoku correctly. We tested the validate function to check if it return the right boolean when we try to put a number in a cell, there is tests to check that it returns true when the number is not in the row, column or block and false when it's not the case. We also tested the getPossibilities function to check if it return the right list of possibilities for a cell but also if it returns and error if the sudoku is invalid.  We tested the solve function to check if it return the right board when we give it a sudoku. Finally, we tested the parseBoardFromFile function to check if it return the right board when we give it a file containing a sudoku but also if it return an error. There are 3 Left tests to check if the function return an error when the file is not found, when the sudoku is invalid and when the number format is invalid.
 
 # Error handling
 
