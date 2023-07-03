@@ -7,14 +7,19 @@ object Main extends ZIOAppDefault {
 
   type Board = Vector[Vector[Option[Int]]]
   
-  def parseBoardFromFile(path: String): Board = {
+  def parseBoardFromFile(path: String): Either[String,Board] = try {
     val lines = Source.fromFile(path).getLines().toList
-    lines.map { line =>
+    val ret = lines.map { line =>
       line.split(" ").map {
         case "." => None
         case num => Some(num.toInt)
       }.toVector
     }.toVector
+    Right(ret)
+  }
+  catch{
+    case nbformatex: java.lang.NumberFormatException => 
+      Left(s"Error parsing file $nbformatex")
   }
 
   def prettyPrint(sudoku: Board): String = {
@@ -93,20 +98,23 @@ object Main extends ZIOAppDefault {
      for {
       _ <- Console.printLine("Enter the number of the sudoku to solve (1 or 2):")
       number <- Console.readLine
-      board = parseBoardFromFile(s"src/main/resources/sudoku$number.txt")
-      _ <- {
-        Console.printLine(prettyPrint(board)+ "\n\nSolving...\n")
-      }
-      _ <- getPossibleValues(board) match {
+      _ <- parseBoardFromFile(s"src/main/resources/sudoku$number.txt") match {
         case Left(error) =>
-          Console.printLine(s"Error: $error")
-        case Right(possibilities) =>
-          solve(possibilities, board) match {
+          Console.printLine(s"Error while parsing : $error")
+        case Right(board) => 
+          //Console.printLine(prettyPrint(board)+ "\n\nSolving...\n") // I don't know why but there is a problem with this instruction (maybe switch to println)
+          println(prettyPrint(board)+ "\n\nSolving...\n")
+          getPossibleValues(board) match {
             case Left(error) =>
               Console.printLine(s"Error: $error")
-            case Right(solved) =>
-              Console.printLine(prettyPrint(solved))
+            case Right(possibilities) =>
+              solve(possibilities, board) match {
+                case Left(error) =>
+                  Console.printLine(s"Error: $error")
+                case Right(solved) =>
+                  Console.printLine(prettyPrint(solved))
           }
+        }
       }
     } yield()
 }
