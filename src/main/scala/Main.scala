@@ -27,6 +27,27 @@ object Main extends ZIOAppDefault {
     }
   }
 
+  def parseBoardToFile(path: String, board: Board): Either[String, Unit] = {
+    try {
+      val lines = board.map { row =>
+        row.map {
+          case None => "."
+          case Some(num) => num.toString
+        }.mkString(" ")
+      }
+      val file = new java.io.PrintWriter(path)
+      try {
+        lines.foreach(file.println)
+      } finally {
+        file.close()
+      }
+      Right(())
+    } catch {
+      case ex: Throwable =>
+        Left(s"Error writing file: ${ex.getMessage}")
+    }
+  }
+
   def prettyPrint(sudoku: Board): String = {
     sudoku.grouped(3).map { bigGroup =>
       bigGroup.map { row =>
@@ -116,6 +137,7 @@ object Main extends ZIOAppDefault {
                 case Left(error) =>
                   Console.printLine(s"Error: $error")
                 case Right(solved) =>
+                  parseBoardToFile(s"src/main/resources/sudoku$number-solved.txt", solved)
                   Console.printLine(prettyPrint(solved))
           }
         }
