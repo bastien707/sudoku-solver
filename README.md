@@ -53,7 +53,7 @@ To build the solver we only needed 3 functions quite shorts thanks to Scala synt
 
 ## The parseBoardFromFile() function
 
-The parseBoardFromFile function reads a Sudoku board from a file. It returns an Either where the Right value contains the parsed board as a two-dimensional vector of optional integers, and the Left value represents any encountered errors during the parsing process. The function handles exceptions for file not found, invalid number format, and general exceptions, returning appropriate error messages in the Left case.
+The parseBoardFromFile function reads a Sudoku board from a file. In our program the path is forced to a local path so the user only input the number of the sudoku, this makes the choice more user friendly. Note that this also work by browsing a local sudoku by specifying the absolute path (/Users/johndoe/Downloads/sudoku1.txt for example). It returns an Either where the Right value contains the parsed board as a two-dimensional vector of optional integers, and the Left value represents any encountered errors during the parsing process. The function handles exceptions for file not found, invalid number format, and general exceptions, returning appropriate error messages in the Left case.
 
 ## The prettyPrint() function
 
